@@ -1,15 +1,14 @@
-import { Routes, Route, Navigate } from 'react-router-dom';
-import Admin from './routes/Admin';
-import Viewer from './routes/Viewer';
+import { Routes, Route } from 'react-router-dom'; // Removido BrowserRouter
+import Admin from "./routes/Admin";
+import ViewDashboard from "./routes/Viewer";
 
-const App = () => {
+function App() {
   return (
     <Routes>
-      <Route path="/" element={<Navigate to="/admin" replace />} />
-      <Route path="/admin" element={<Admin />} />
-      <Route path="/view/:id" element={<Viewer />} />
+      <Route path="/" element={<Admin />} />
+      <Route path="/view/:id" element={<ViewDashboard />} />
     </Routes>
   );
-};
+}
 
 export default App;

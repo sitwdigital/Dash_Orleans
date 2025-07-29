@@ -1,11 +1,14 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+
 import Header from '../components/Header';
 import TopBar from '../components/TopBar';
 import UploadExcel from '../components/UploadExcel';
 import SummaryCards from '../components/SummaryCards';
 import GroupCards from '../components/GroupCards';
 import Footer from '../components/Footer';
-import { saveDashboard } from '../utils/storage';
+
+import { shareDashboard } from '../services/shareDashboard';
 
 const Admin = () => {
   const [summaryData, setSummaryData] = useState(null);
@@ -14,16 +17,20 @@ const Admin = () => {
   const [filtro, setFiltro] = useState('Todos');
   const [fileName, setFileName] = useState('');
 
+  const navigate = useNavigate();
+
   const handleShare = async () => {
     if (!summaryData || !groupList.length) return;
-    const id = saveDashboard(summaryData, groupList);
-    const link = `${window.location.origin}/view/${id}`;
 
-    try {
-      await navigator.clipboard.writeText(link);
-      alert('Link copiado:\n' + link);
-    } catch {
-      prompt('Copie o link manualmente:', link);
+    const id = await shareDashboard(summaryData, groupList);
+    if (id) {
+      const link = `${window.location.origin}/view/${id}`;
+      try {
+        await navigator.clipboard.writeText(link);
+        alert('Link copiado:\n' + link);
+      } catch {
+        prompt('Copie o link manualmente:', link);
+      }
     }
   };
 
@@ -32,7 +39,6 @@ const Admin = () => {
       <Header />
 
       <main className="flex-grow px-4 py-6 bg-gray-100">
-        {/* BLOCO DE UPLOAD INICIAL AJUSTADO */}
         {!summaryData && (
           <div className="w-full max-w-xl mx-auto">
             <div className="text-center mt-28 mb-4">
@@ -64,7 +70,6 @@ const Admin = () => {
           </div>
         )}
 
-        {/* CONTEÚDO COMPLETO DEPOIS DO UPLOAD */}
         {summaryData && (
           <div className="max-w-7xl mx-auto w-full">
             <TopBar
@@ -112,4 +117,3 @@ const Admin = () => {
 };
 
 export default Admin;
-    
