@@ -12,17 +12,23 @@ const UploadExcel = ({ onDataParsed }) => {
       complete: (results) => {
         const data = results.data;
 
-        // Corrige colunas que vêm como: { 'Nome': 'xxx', 'Participantes reais': '123' }
-        const grupos = data.map(row => ({
-          nome: row['Nome']?.trim(),
-          membros: parseInt(row['Participantes reais']) || 0
-        }));
+        // Filtra apenas nome e participantes reais
+        const grupos = data
+          .map((row) => {
+            const nome = row['Nome']?.trim();
+            const membros = parseInt(row['Participantes reais']) || 0;
+
+            if (!nome || isNaN(membros)) return null;
+            return { nome, membros };
+          })
+          .filter(Boolean); // remove linhas inválidas
 
         const totalGrupos = grupos.length;
         const totalMembros = grupos.reduce((acc, g) => acc + g.membros, 0);
         const mediaPorGrupo = totalGrupos ? Math.round(totalMembros / totalGrupos) : 0;
         const maiorGrupoObj = grupos.reduce((prev, curr) =>
-          curr.membros > prev.membros ? curr : prev
+          curr.membros > prev.membros ? curr : prev,
+          { membros: 0, nome: '' }
         );
 
         const resumo = {
@@ -33,8 +39,11 @@ const UploadExcel = ({ onDataParsed }) => {
           cidadeMaiorGrupo: maiorGrupoObj.nome,
         };
 
-        // Envia para o App.jsx
         onDataParsed(resumo, grupos);
+      },
+      error: (err) => {
+        console.error('Erro ao processar CSV:', err.message);
+        alert('Erro ao processar o arquivo CSV.');
       },
     });
   };
@@ -52,5 +61,3 @@ const UploadExcel = ({ onDataParsed }) => {
 };
 
 export default UploadExcel;
-
-
