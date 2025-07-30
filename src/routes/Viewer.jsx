@@ -15,14 +15,14 @@ const Viewer = () => {
   const [dashboard, setDashboard] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [filtro, setFiltro] = useState('Todos');
+  const [updateDate, setUpdateDate] = useState(null);
 
   useEffect(() => {
     async function fetchData() {
       if (id) {
-        // Buscar do Supabase com os campos corretos
         const { data, error } = await supabase
           .from('dashboards')
-          .select('summary, groups')
+          .select('summary, groups, updated_at')
           .eq('id', id)
           .single();
 
@@ -31,9 +31,21 @@ const Viewer = () => {
           setDashboard(null);
         } else {
           setDashboard(data);
+
+          if (data.updated_at) {
+            const formatado = new Date(data.updated_at).toLocaleString('pt-BR', {
+              timeZone: 'America/Fortaleza',
+              day: '2-digit',
+              month: '2-digit',
+              year: 'numeric',
+              hour: '2-digit',
+              minute: '2-digit',
+            });
+
+            setUpdateDate(formatado.replace(',', ' ÀS') + 'H');
+          }
         }
       } else {
-        // Buscar do localStorage
         const stored = loadDashboard();
         setDashboard(stored);
       }
@@ -64,6 +76,14 @@ const Viewer = () => {
           setFiltro={setFiltro}
         />
 
+        {updateDate && (
+          <div className="mt-2 mb-4 text-center md:text-left">
+            <div className="inline-block bg-white px-4 py-2 rounded-md shadow text-sm text-gray-600 font-medium border border-gray-200">
+              ATUALIZADA EM {updateDate}
+            </div>
+          </div>
+        )}
+
         <SummaryCards data={summary} />
 
         <GroupCards 
@@ -79,4 +99,4 @@ const Viewer = () => {
   );
 };
 
-export default Viewer;
+export default Viewer;

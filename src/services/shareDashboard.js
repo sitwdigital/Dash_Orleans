@@ -1,20 +1,21 @@
 import { supabase } from '../utils/supabase';
-import { v4 as uuidv4 } from 'uuid'; // Certifique-se que você rodou: npm install uuid
 
 export async function shareDashboard(summaryData, groupList) {
   if (!summaryData || !groupList.length) return null;
 
-  const id = uuidv4();
+  const id = 'orleans-principal'; // ID fixo
 
   const { error } = await supabase
     .from('dashboards')
-    .insert([
+    .upsert([
       {
         id,
         summary: summaryData,
         groups: groupList,
       }
-    ]);
+    ], {
+      onConflict: ['id'] // substitui se já existir
+    });
 
   if (error) {
     console.error('Erro ao salvar dashboard:', error);
@@ -23,4 +24,3 @@ export async function shareDashboard(summaryData, groupList) {
 
   return id;
 }
-
