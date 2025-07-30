@@ -30,6 +30,8 @@ const Viewer = () => {
           console.error('Erro ao carregar do Supabase:', error);
           setDashboard(null);
         } else {
+          // Ordena grupos do maior para o menor número de membros
+          data.groups.sort((a, b) => b.membros - a.membros);
           setDashboard(data);
 
           if (data.updated_at) {
@@ -47,6 +49,9 @@ const Viewer = () => {
         }
       } else {
         const stored = loadDashboard();
+        if (stored?.groups) {
+          stored.groups.sort((a, b) => b.membros - a.membros);
+        }
         setDashboard(stored);
       }
     }
@@ -74,6 +79,7 @@ const Viewer = () => {
           setSearchTerm={setSearchTerm} 
           filtro={filtro}
           setFiltro={setFiltro}
+          hideShareButton // <- isso remove o botão, precisa tratar esse prop no componente TopBar
         />
 
         {updateDate && (

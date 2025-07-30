@@ -54,8 +54,9 @@ const Admin = () => {
               <div className="flex gap-3 flex-wrap items-center">
                 <UploadExcel
                   onDataParsed={(resumo, grupos, fileName) => {
+                    const gruposOrdenados = [...grupos].sort((a, b) => b.membros - a.membros);
                     setSummaryData(resumo);
-                    setGroupList(grupos);
+                    setGroupList(gruposOrdenados);
                     setFileName(fileName || '');
                   }}
                 />

@@ -1,6 +1,14 @@
 import React from 'react';
 
-const TopBar = ({ searchTerm, setSearchTerm, filtro, setFiltro, handleShare, summaryData }) => {
+const TopBar = ({
+  searchTerm,
+  setSearchTerm,
+  filtro,
+  setFiltro,
+  handleShare,
+  summaryData,
+  hideShareButton = false, // nova prop
+}) => {
   return (
     <div className="bg-white p-4 rounded-lg shadow-md flex flex-col md:flex-row items-center justify-between gap-4 mb-6">
       <div className="flex w-full flex-col md:flex-row gap-4 md:items-center md:w-3/4">
@@ -23,15 +31,17 @@ const TopBar = ({ searchTerm, setSearchTerm, filtro, setFiltro, handleShare, sum
         </select>
       </div>
 
-      <button
-        onClick={handleShare}
-        disabled={!summaryData}
-        className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md transition disabled:opacity-50"
-      >
-        📤 Compartilhar
-      </button>
+      {!hideShareButton && (
+        <button
+          onClick={handleShare}
+          disabled={!summaryData}
+          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md transition disabled:opacity-50"
+        >
+          📤 Compartilhar
+        </button>
+      )}
     </div>
   );
 };
 
-export default TopBar;
+export default TopBar;
