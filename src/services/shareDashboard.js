@@ -12,6 +12,7 @@ export async function shareDashboard(summaryData, groupList) {
         id,
         summary: summaryData,
         groups: groupList,
+        updated_at: new Date().toISOString(), // força a trigger de atualização
       }
     ], {
       onConflict: ['id'] // substitui se já existir
@@ -22,5 +23,5 @@ export async function shareDashboard(summaryData, groupList) {
     return null;
   }
 
-  return id;
+  return id;
 }

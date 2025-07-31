@@ -1,15 +1,16 @@
 import React from 'react';
 import Papa from 'papaparse';
+import { shareDashboard } from '../services/shareDashboard'; // <-- certifique-se que o caminho esteja correto
 
 const UploadExcel = ({ onDataParsed }) => {
-  const handleFileUpload = (e) => {
+  const handleFileUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
     Papa.parse(file, {
       header: true,
       skipEmptyLines: true,
-      complete: (results) => {
+      complete: async (results) => {
         const data = results.data;
 
         // Filtra apenas nome e participantes reais
@@ -21,7 +22,7 @@ const UploadExcel = ({ onDataParsed }) => {
             if (!nome || isNaN(membros)) return null;
             return { nome, membros };
           })
-          .filter(Boolean); // remove linhas inválidas
+          .filter(Boolean);
 
         const totalGrupos = grupos.length;
         const totalMembros = grupos.reduce((acc, g) => acc + g.membros, 0);
@@ -39,7 +40,16 @@ const UploadExcel = ({ onDataParsed }) => {
           cidadeMaiorGrupo: maiorGrupoObj.nome,
         };
 
+        // Callback para atualizar os componentes locais
         onDataParsed(resumo, grupos);
+
+        // 🚀 Atualiza automaticamente no Supabase
+        try {
+          await shareDashboard(resumo, grupos);
+          console.log('Dashboard atualizado automaticamente no Supabase!');
+        } catch (error) {
+          console.error('Erro ao compartilhar automaticamente:', error);
+        }
       },
       error: (err) => {
         console.error('Erro ao processar CSV:', err.message);

@@ -7,7 +7,6 @@ import SummaryCards from '../components/SummaryCards';
 import GroupCards from '../components/GroupCards';
 import Footer from '../components/Footer';
 
-import { loadDashboard } from '../utils/storage';
 import { supabase } from '../utils/supabase';
 
 const Viewer = () => {
@@ -18,19 +17,22 @@ const Viewer = () => {
   const [updateDate, setUpdateDate] = useState(null);
 
   useEffect(() => {
+    const controller = new AbortController();
+    const signal = controller.signal;
+
     async function fetchData() {
       if (id) {
         const { data, error } = await supabase
           .from('dashboards')
           .select('summary, groups, updated_at')
           .eq('id', id)
-          .single();
+          .single()
+          .abortSignal(signal); // força o Supabase a usar a chamada atual, sem cache
 
         if (error || !data) {
           console.error('Erro ao carregar do Supabase:', error);
           setDashboard(null);
         } else {
-          // Ordena grupos do maior para o menor número de membros
           data.groups.sort((a, b) => b.membros - a.membros);
           setDashboard(data);
 
@@ -47,16 +49,12 @@ const Viewer = () => {
             setUpdateDate(formatado.replace(',', ' ÀS') + 'H');
           }
         }
-      } else {
-        const stored = loadDashboard();
-        if (stored?.groups) {
-          stored.groups.sort((a, b) => b.membros - a.membros);
-        }
-        setDashboard(stored);
       }
     }
 
     fetchData();
+
+    return () => controller.abort(); // limpa requisições pendentes ao desmontar
   }, [id]);
 
   if (!dashboard) {
@@ -79,7 +77,7 @@ const Viewer = () => {
           setSearchTerm={setSearchTerm} 
           filtro={filtro}
           setFiltro={setFiltro}
-          hideShareButton // <- isso remove o botão, precisa tratar esse prop no componente TopBar
+          hideShareButton
         />
 
         {updateDate && (
@@ -105,4 +103,4 @@ const Viewer = () => {
   );
 };
 
-export default Viewer;
+export default Viewer;
