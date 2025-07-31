@@ -1,11 +1,15 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Papa from 'papaparse';
 import { shareDashboard } from '../services/shareDashboard'; // <-- certifique-se que o caminho esteja correto
 
 const UploadExcel = ({ onDataParsed }) => {
+  const [fileName, setFileName] = useState('');
+
   const handleFileUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
+
+    setFileName(file.name); // Mostra nome do arquivo
 
     Papa.parse(file, {
       header: true,
@@ -13,12 +17,10 @@ const UploadExcel = ({ onDataParsed }) => {
       complete: async (results) => {
         const data = results.data;
 
-        // Filtra apenas nome e participantes reais
         const grupos = data
           .map((row) => {
             const nome = row['Nome']?.trim();
             const membros = parseInt(row['Participantes reais']) || 0;
-
             if (!nome || isNaN(membros)) return null;
             return { nome, membros };
           })
@@ -40,10 +42,8 @@ const UploadExcel = ({ onDataParsed }) => {
           cidadeMaiorGrupo: maiorGrupoObj.nome,
         };
 
-        // Callback para atualizar os componentes locais
         onDataParsed(resumo, grupos);
 
-        // 🚀 Atualiza automaticamente no Supabase
         try {
           await shareDashboard(resumo, grupos);
           console.log('Dashboard atualizado automaticamente no Supabase!');
@@ -59,15 +59,23 @@ const UploadExcel = ({ onDataParsed }) => {
   };
 
   return (
-    <div className="mb-6">
-      <input
-        type="file"
-        accept=".csv"
-        onChange={handleFileUpload}
-        className="file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:bg-blue-600 file:text-white hover:file:bg-blue-700"
-      />
+    <div className="mb-6 flex flex-col items-center text-center">
+      <label className="w-full max-w-xs">
+        <input
+          type="file"
+          accept=".csv"
+          onChange={handleFileUpload}
+          className="w-full file:py-2 file:px-4 file:rounded-md file:border-0 file:bg-blue-600 file:text-white hover:file:bg-blue-700"
+        />
+      </label>
+
+      {fileName && (
+        <p className="mt-2 text-sm text-gray-600 break-words max-w-xs">
+          {fileName}
+        </p>
+      )}
     </div>
   );
 };
 
-export default UploadExcel;
+export default UploadExcel;
