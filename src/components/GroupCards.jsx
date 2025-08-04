@@ -9,11 +9,20 @@ const getClassificacao = (membros) => {
 
 const ITEMS_PER_PAGE = 8;
 
+function normalizarTexto(texto) {
+  return texto
+    .normalize('NFD') // separa acentos das letras
+    .replace(/[\u0300-\u036f]/g, '') // remove os acentos
+    .toLowerCase(); // transforma tudo em minúsculo
+}
+
 const GroupCards = ({ grupos, searchTerm, filtro, media }) => {
   const [currentPage, setCurrentPage] = useState(1);
 
   const gruposFiltrados = grupos
-    .filter((g) => g.nome.toLowerCase().includes(searchTerm.toLowerCase()))
+    .filter((g) =>
+      normalizarTexto(g.nome).includes(normalizarTexto(searchTerm))
+    )
     .filter((g) => {
       if (filtro === 'Ativos') return g.membros >= 10;
       if (filtro === 'Inativos') return g.membros < 10;
@@ -42,7 +51,9 @@ const GroupCards = ({ grupos, searchTerm, filtro, media }) => {
             >
               <h3 className="font-semibold text-sm mb-2">{grupo.nome}</h3>
 
-              <span className={`text-xs text-white px-2 py-1 rounded-full ${color}`}>
+              <span
+                className={`text-xs text-white px-2 py-1 rounded-full ${color} `}
+              >
                 {label}
               </span>
 
@@ -51,14 +62,13 @@ const GroupCards = ({ grupos, searchTerm, filtro, media }) => {
                   <p className="text-2xl font-bold">{grupo.membros}</p>
                   <p className="text-sm text-gray-500">membros</p>
                 </div>
-
                 <Users size={32} className="text-[#1A67B5]" />
               </div>
 
               <div className="mt-3 w-full bg-gray-200 h-2 rounded">
                 <div
                   className="h-2 rounded bg-green-500"
-                  style={{ width: `${porcentagem}%` }}
+                  style={{ width: `${porcentagem}% ` }}
                 ></div>
               </div>
             </div>
@@ -68,7 +78,7 @@ const GroupCards = ({ grupos, searchTerm, filtro, media }) => {
 
       {/* Paginação */}
       {totalPages > 1 && (
-        <div className="flex justify-center mt-12 gap-6"> {/* AQUI aumentamos mt de 6 para 10 */}
+        <div className="flex justify-center mt-12 gap-6">
           <button
             onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
             disabled={currentPage === 1}
@@ -94,4 +104,4 @@ const GroupCards = ({ grupos, searchTerm, filtro, media }) => {
   );
 };
 
-export default GroupCards;
+export default GroupCards;
