@@ -19,7 +19,6 @@ const Viewer = () => {
   const [senhaDigitada, setSenhaDigitada] = useState('');
   const [autenticado, setAutenticado] = useState(false);
 
-  //  Senha fixa
   const senhaCorreta = 'marcus';
 
   useEffect(() => {
@@ -62,7 +61,6 @@ const Viewer = () => {
     return () => controller.abort();
   }, [id, autenticado]);
 
-  // Tela de senha antes de liberar acesso
   if (!autenticado) {
     return (
       <div className="flex flex-col justify-center items-center h-screen bg-gray-100">
@@ -121,7 +119,8 @@ const Viewer = () => {
           </div>
         )}
 
-        <SummaryCards data={summary} />
+        {/* grupos juntos no data */}
+        <SummaryCards data={{ ...summary, grupos: groups }} />
 
         <GroupCards 
           grupos={groups} 

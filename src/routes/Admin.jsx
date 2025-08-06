@@ -24,7 +24,7 @@ const Admin = () => {
 
     const id = await shareDashboard(summaryData, groupList);
     if (id) {
-      const link = `${window.location.origin}/view/${id}`;
+      const link = `${window.location.origin}/view/${id} `;
       try {
         await navigator.clipboard.writeText(link);
         alert('Link copiado:\n' + link);
@@ -100,7 +100,8 @@ const Admin = () => {
               )}
             </div>
 
-            <SummaryCards data={summaryData} />
+            {/* ✅ Aqui foi o ajuste: passando grupos dentro do data */}
+            <SummaryCards data={{ ...summaryData, grupos: groupList }} />
 
             <GroupCards
               grupos={groupList}
@@ -117,4 +118,4 @@ const Admin = () => {
   );
 };
 
-export default Admin;
+export default Admin;

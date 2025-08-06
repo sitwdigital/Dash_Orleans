@@ -24,8 +24,8 @@ const GroupCards = ({ grupos, searchTerm, filtro, media }) => {
       normalizarTexto(g.nome).includes(normalizarTexto(searchTerm))
     )
     .filter((g) => {
-      if (filtro === 'Ativos') return g.membros >= 10;
-      if (filtro === 'Inativos') return g.membros < 10;
+      if (filtro === 'Ativos') return g.membros >= 21;
+      if (filtro === 'Inativos') return g.membros <= 20;
       return true;
     });
 

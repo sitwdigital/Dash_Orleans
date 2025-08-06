@@ -1,9 +1,11 @@
 const SummaryCards = ({ data }) => {
+  const gruposAtivos = data?.grupos?.filter((g) => g.membros >= 21).length || 0;
+
   const cardData = data ? [
     {
       title: 'Total de Grupos',
       value: data.totalGrupos,
-      description: ' Grupos ',
+      description: 'Grupos',
       color: 'from-blue-500 to-blue-700',
     },
     {
@@ -21,13 +23,19 @@ const SummaryCards = ({ data }) => {
     {
       title: 'Maior Grupo',
       value: data.maiorGrupo,
-      description: `${data.cidadeMaiorGrupo}`,
+      description: `${data.cidadeMaiorGrupo}  `,
       color: 'from-orange-500 to-orange-600',
+    },
+    {
+      title: 'Grupos Ativos',
+      value: gruposAtivos,
+      description: 'Acima de 21 membros',
+      color: 'from-teal-500 to-teal-600',
     },
   ] : [];
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
       {cardData.map((card, index) => (
         <div
           key={index}
@@ -42,4 +50,4 @@ const SummaryCards = ({ data }) => {
   );
 };
 
-export default SummaryCards;
+export default SummaryCards;
