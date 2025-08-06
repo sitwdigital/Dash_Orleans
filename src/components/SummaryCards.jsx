@@ -8,17 +8,17 @@ const SummaryCards = ({ data }) => {
       description: 'Grupos',
       color: 'from-blue-500 to-blue-700',
     },
+     {
+      title: 'Grupos Ativos',
+      value: gruposAtivos,
+      description: 'Acima de 21 membros',
+      color: 'from-teal-500 to-teal-600',
+    },
     {
       title: 'Total de Membros',
       value: data.totalMembros,
       description: 'Participantes ativos',
       color: 'from-green-500 to-green-600',
-    },
-    {
-      title: 'Média por Grupo',
-      value: data.mediaPorGrupo,
-      description: 'Participação média',
-      color: 'from-purple-500 to-purple-600',
     },
     {
       title: 'Maior Grupo',
@@ -27,11 +27,12 @@ const SummaryCards = ({ data }) => {
       color: 'from-orange-500 to-orange-600',
     },
     {
-      title: 'Grupos Ativos',
-      value: gruposAtivos,
-      description: 'Acima de 21 membros',
-      color: 'from-teal-500 to-teal-600',
+      title: 'Média por Grupo',
+      value: data.mediaPorGrupo,
+      description: 'Participação média',
+      color: 'from-purple-500 to-purple-600',
     },
+   
   ] : [];
 
   return (
