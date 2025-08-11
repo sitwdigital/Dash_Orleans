@@ -15,6 +15,7 @@ const Admin = () => {
   const [groupList, setGroupList] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [filtro, setFiltro] = useState('Todos');
+  const [regiao, setRegiao] = useState('Todas as regiões'); // <- NOVO
   const [fileName, setFileName] = useState('');
 
   const navigate = useNavigate();
@@ -78,6 +79,8 @@ const Admin = () => {
               setSearchTerm={setSearchTerm}
               filtro={filtro}
               setFiltro={setFiltro}
+              regiao={regiao}                 // <- NOVO
+              setRegiao={setRegiao}           // <- NOVO
               handleShare={handleShare}
               summaryData={summaryData}
             />
@@ -86,8 +89,9 @@ const Admin = () => {
               <div className="flex gap-3 flex-wrap items-center">
                 <UploadExcel
                   onDataParsed={(resumo, grupos, fileName) => {
+                    const gruposOrdenados = [...grupos].sort((a, b) => b.membros - a.membros);
                     setSummaryData(resumo);
-                    setGroupList(grupos);
+                    setGroupList(gruposOrdenados);
                     setFileName(fileName || '');
                   }}
                 />
@@ -100,7 +104,7 @@ const Admin = () => {
               )}
             </div>
 
-            {/* ✅ Aqui foi o ajuste: passando grupos dentro do data */}
+            {/* Passa os grupos para o SummaryCards para ele calcular "Grupos Ativos" */}
             <SummaryCards data={{ ...summaryData, grupos: groupList }} />
 
             <GroupCards
@@ -108,6 +112,7 @@ const Admin = () => {
               searchTerm={searchTerm}
               filtro={filtro}
               media={summaryData?.mediaPorGrupo || 0}
+              regiao={regiao}                 // <- NOVO
             />
           </div>
         )}

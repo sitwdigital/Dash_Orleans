@@ -1,5 +1,12 @@
-import React, { useState } from 'react';
+// src/components/GroupCards.jsx
+import React, { useEffect, useMemo, useState } from 'react';
 import { Users } from 'lucide-react';
+import {
+  REGIOES,
+  CIDADES_NORMALIZADAS,
+  normalize,
+  applyAliases,
+} from '../constants/regioes';
 
 const getClassificacao = (membros) => {
   if (membros > 500) return { label: 'Grande', color: 'bg-green-500' };
@@ -9,32 +16,60 @@ const getClassificacao = (membros) => {
 
 const ITEMS_PER_PAGE = 8;
 
-function normalizarTexto(texto) {
-  return texto
-    .normalize('NFD') // separa acentos das letras
-    .replace(/[\u0300-\u036f]/g, '') // remove os acentos
-    .toLowerCase(); // transforma tudo em minúsculo
-}
-
-const GroupCards = ({ grupos, searchTerm, filtro, media }) => {
+const GroupCards = ({ grupos, searchTerm, filtro, media, regiao }) => {
   const [currentPage, setCurrentPage] = useState(1);
 
-  const gruposFiltrados = grupos
-    .filter((g) =>
-      normalizarTexto(g.nome).includes(normalizarTexto(searchTerm))
-    )
-    .filter((g) => {
-      if (filtro === 'Ativos') return g.membros >= 21;
-      if (filtro === 'Inativos') return g.membros <= 20;
-      return true;
-    });
+  // normaliza termo de busca uma única vez
+  const normSearch = useMemo(() => applyAliases(normalize(searchTerm)), [searchTerm]);
 
+  // Set de cidades normalizadas para a região (ou null para "Todas as regiões")
+  const cidadesDaRegiao = useMemo(() => {
+    if (!regiao || regiao === 'Todas as regiões') return null;
+    return CIDADES_NORMALIZADAS[regiao] || null;
+  }, [regiao]);
+
+  // sempre que filtros mudarem, volta pra página 1
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [normSearch, filtro, regiao]);
+
+  const gruposFiltrados = useMemo(() => {
+    const base = Array.isArray(grupos) ? grupos : [];
+
+    return base
+      // busca por nome (sem acento/caixa e ignorando "com orleans", "grupo 10", etc.)
+      .filter((g) => {
+        const nomeNorm = applyAliases(normalize(g?.nome || ''));
+        return nomeNorm.includes(normSearch);
+      })
+      // filtro de ativo/inativo (21+ = Ativos; <=20 = Inativos)
+      .filter((g) => {
+        if (filtro === 'Ativos') return g.membros >= 21;
+        if (filtro === 'Inativos') return g.membros <= 20;
+        return true;
+      })
+      // filtro por região, se selecionada
+      .filter((g) => {
+        if (!cidadesDaRegiao) return true;
+        const nomeNorm = applyAliases(normalize(g?.nome || ''));
+        // bate por inclusão: se o nome do grupo conter o nome da cidade normalizada
+        for (const cidade of cidadesDaRegiao) {
+          if (nomeNorm.includes(cidade)) return true;
+        }
+        return false;
+      });
+  }, [grupos, normSearch, filtro, cidadesDaRegiao]);
+
+  // paginação
+  const totalPages = Math.max(1, Math.ceil(gruposFiltrados.length / ITEMS_PER_PAGE));
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
   const endIndex = startIndex + ITEMS_PER_PAGE;
   const gruposPaginados = gruposFiltrados.slice(startIndex, endIndex);
 
-  const totalPages = Math.ceil(gruposFiltrados.length / ITEMS_PER_PAGE);
-  const maiorValor = Math.max(...gruposFiltrados.map((g) => g.membros), 1);
+  // maior valor para barra de progresso
+  const maiorValor = gruposFiltrados.length
+    ? Math.max(...gruposFiltrados.map((g) => g.membros), 1)
+    : 1;
 
   return (
     <div>
@@ -46,14 +81,12 @@ const GroupCards = ({ grupos, searchTerm, filtro, media }) => {
 
           return (
             <div
-              key={idx}
+              key={`${grupo.nome}-${idx}`}
               className="bg-white p-4 rounded-xl shadow hover:shadow-md transition border"
             >
               <h3 className="font-semibold text-sm mb-2">{grupo.nome}</h3>
 
-              <span
-                className={`text-xs text-white px-2 py-1 rounded-full ${color} `}
-              >
+              <span className={`text-xs text-white px-2 py-1 rounded-full ${color}`}>
                 {label}
               </span>
 
@@ -62,14 +95,15 @@ const GroupCards = ({ grupos, searchTerm, filtro, media }) => {
                   <p className="text-2xl font-bold">{grupo.membros}</p>
                   <p className="text-sm text-gray-500">membros</p>
                 </div>
+
                 <Users size={32} className="text-[#1A67B5]" />
               </div>
 
               <div className="mt-3 w-full bg-gray-200 h-2 rounded">
                 <div
                   className="h-2 rounded bg-green-500"
-                  style={{ width: `${porcentagem}% ` }}
-                ></div>
+                  style={{ width: ` ${porcentagem}% `}}
+                />
               </div>
             </div>
           );

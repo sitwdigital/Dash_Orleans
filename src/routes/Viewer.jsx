@@ -14,6 +14,7 @@ const Viewer = () => {
   const [dashboard, setDashboard] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [filtro, setFiltro] = useState('Todos');
+  const [regiao, setRegiao] = useState('Todas as regiões'); // NOVO
   const [updateDate, setUpdateDate] = useState(null);
 
   const [senhaDigitada, setSenhaDigitada] = useState('');
@@ -39,6 +40,7 @@ const Viewer = () => {
         console.error('Erro ao carregar do Supabase:', error);
         setDashboard(null);
       } else {
+        // ordena do maior para o menor
         data.groups.sort((a, b) => b.membros - a.membros);
         setDashboard(data);
 
@@ -51,7 +53,6 @@ const Viewer = () => {
             hour: '2-digit',
             minute: '2-digit',
           });
-
           setUpdateDate(formatado.replace(',', ' ÀS') + 'H');
         }
       }
@@ -61,6 +62,7 @@ const Viewer = () => {
     return () => controller.abort();
   }, [id, autenticado]);
 
+  // Gate de senha
   if (!autenticado) {
     return (
       <div className="flex flex-col justify-center items-center h-screen bg-gray-100">
@@ -103,11 +105,13 @@ const Viewer = () => {
       <Header />
 
       <main className="flex-grow p-4 max-w-7xl mx-auto">
-        <TopBar 
-          searchTerm={searchTerm} 
-          setSearchTerm={setSearchTerm} 
+        <TopBar
+          searchTerm={searchTerm}
+          setSearchTerm={setSearchTerm}
           filtro={filtro}
           setFiltro={setFiltro}
+          regiao={regiao}           // NOVO
+          setRegiao={setRegiao}     // NOVO
           hideShareButton
         />
 
@@ -119,14 +123,15 @@ const Viewer = () => {
           </div>
         )}
 
-        {/* grupos juntos no data */}
+        {/* passa os grupos dentro de data para o SummaryCards calcular “Grupos Ativos” */}
         <SummaryCards data={{ ...summary, grupos: groups }} />
 
-        <GroupCards 
-          grupos={groups} 
-          searchTerm={searchTerm} 
-          filtro={filtro} 
+        <GroupCards
+          grupos={groups}
+          searchTerm={searchTerm}
+          filtro={filtro}
           media={summary?.mediaPorGrupo || 0}
+          regiao={regiao}           // NOVO
         />
       </main>
 
@@ -135,4 +140,4 @@ const Viewer = () => {
   );
 };
 
-export default Viewer;
+export default Viewer;
